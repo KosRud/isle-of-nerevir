@@ -1,6 +1,7 @@
 {
 	"scripts": {
 		"run": "npx @neutralinojs/neu run",
-		"run-trace": "npx cross-env NODE_OPTIONS=--trace-deprecation npx @neutralinojs/neu run"
+		"run-trace": "npx cross-env NODE_OPTIONS=--trace-deprecation npx @neutralinojs/neu run",
+		"build": "npx @neutralinojs/neu build"
 	}
 }
