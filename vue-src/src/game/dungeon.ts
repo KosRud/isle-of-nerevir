@@ -1,8 +1,5 @@
 import type { Enum, EnumValue } from '../../submodules/MadCakeUtil-ts/mod';
 
-type Corridor = ('d' | 'r' | 'u' | 'd')[];
-type SeedCorridor = ['d', ...('d' | 'r')[]];
-
 const Moves: Enum = {
 	DOWN: 0,
 	LEFT: 1,
@@ -10,24 +7,57 @@ const Moves: Enum = {
 	RIGHT: 3,
 };
 
-const corridors: EnumValue<typeof Moves>[][] = [
+type Corridor = EnumValue<typeof Moves>[];
+
+const corridorsSeed: Corridor[] = [
 	[Moves.DOWN, Moves.DOWN],
 	[Moves.DOWN, Moves.DOWN, Moves.DOWN],
 	[Moves.DOWN, Moves.DOWN, Moves.RIGHT],
 	[Moves.DOWN, Moves.RIGHT, Moves.DOWN],
 ];
 
-const mirror: Record<keyof typeof Moves, number | undefined> = {
+type CorridorMap = Record<
+	EnumValue<typeof Moves>,
+	EnumValue<typeof Moves> | undefined
+>;
+
+const mirror: CorridorMap = {
 	[Moves.LEFT]: Moves.RIGHT,
 	[Moves.RIGHT]: Moves.LEFT,
 };
 
-const spinner = {
+const spinner: CorridorMap = {
 	[Moves.DOWN]: Moves.LEFT,
 	[Moves.LEFT]: Moves.UP,
 	[Moves.UP]: Moves.RIGHT,
 	[Moves.RIGHT]: Moves.DOWN,
 };
+
+function mapCorridor(corridor: Corridor, map: CorridorMap): Corridor {
+	return corridor.map((move) => map[move] ?? move);
+}
+
+// TODO: remove duplicates
+
+function getValidCorridors(corridorsSeed: Corridor[]) {
+	const allCorridors = corridorsSeed.slice();
+
+	for (const corridor of corridorsSeed) {
+		allCorridors.push(mapCorridor(corridor, mirror));
+	}
+
+	let lastSpin = allCorridors.slice();
+	for (const _ in Array.from({ length: 5 })) {
+		lastSpin = lastSpin.map((corridor) => mapCorridor(corridor, spinner));
+		for (const corridor of lastSpin) {
+			allCorridors.push(corridor);
+		}
+	}
+
+	return allCorridors;
+}
+
+console.log(JSON.stringify(getValidCorridors(corridorsSeed)));
 
 // ------- algorithm
 
