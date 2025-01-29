@@ -79,7 +79,7 @@ Make a full set of valid corridor shapes:
 
 Pick a room.
 Pick random corridor direction.
-Try placing a new room.
+Try placing a new room. (corridor and room itself do not overlap, no adjacent rooms)
 If successful, loop. If unsuccessful, keep trying different corridors.
 If no valid corridors left, ban this room and pick another.
 There will always be a possibility to spawn a new room, so stop when you have enough.
