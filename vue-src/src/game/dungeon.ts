@@ -1,49 +1,51 @@
 import type { Enum, EnumValue } from '../../submodules/MadCakeUtil-ts/mod';
 
-const Moves: Enum = {
+const Move: Enum = {
 	DOWN: 0,
 	LEFT: 1,
 	UP: 2,
 	RIGHT: 3,
 };
 
-type MoveValue = EnumValue<typeof Moves>;
+type MoveValue = EnumValue<typeof Move>;
 type Corridor = MoveValue[];
 
 const corridorsSeed: Corridor[] = [
-	[Moves.DOWN, Moves.DOWN],
-	[Moves.DOWN, Moves.DOWN, Moves.DOWN],
-	[Moves.DOWN, Moves.DOWN, Moves.RIGHT],
-	[Moves.DOWN, Moves.RIGHT, Moves.DOWN],
+	[Move.DOWN, Move.DOWN],
+	[Move.DOWN, Move.DOWN, Move.DOWN],
+	[Move.DOWN, Move.DOWN, Move.RIGHT],
+	[Move.DOWN, Move.RIGHT, Move.DOWN],
 ];
 
-type CorridorMap = Record<MoveValue, MoveValue | undefined>;
+type MoveMap = Record<MoveValue, MoveValue | undefined>;
 
 const moveMaps = {
 	mirror: {
-		[Moves.LEFT]: Moves.RIGHT,
-		[Moves.RIGHT]: Moves.LEFT,
+		[Move.LEFT]: Move.RIGHT,
+		[Move.RIGHT]: Move.LEFT,
 	},
 
 	spin: {
-		[Moves.DOWN]: Moves.LEFT,
-		[Moves.LEFT]: Moves.UP,
-		[Moves.UP]: Moves.RIGHT,
-		[Moves.RIGHT]: Moves.DOWN,
+		[Move.DOWN]: Move.LEFT,
+		[Move.LEFT]: Move.UP,
+		[Move.UP]: Move.RIGHT,
+		[Move.RIGHT]: Move.DOWN,
 	},
 } as const;
 
 type CorridorMapFunc = (corridor: Corridor) => Corridor;
 
-function corridorMapper(map: CorridorMap): CorridorMapFunc {
+function corridorMapFunc(map: MoveMap): CorridorMapFunc {
 	return (corridor: Corridor) => corridor.map((move) => map[move] ?? move);
 }
 
-type CorridorMappers = { [key in keyof typeof moveMaps]: CorridorMapFunc };
+type CorridorMapFuncCollection = {
+	[key in keyof typeof moveMaps]: CorridorMapFunc;
+};
 
-const mappers: CorridorMappers = Object.fromEntries(
-	Object.entries(moveMaps).map(([name, map]) => [name, corridorMapper(map)])
-) as CorridorMappers;
+const mapFuncs: CorridorMapFuncCollection = Object.fromEntries(
+	Object.entries(moveMaps).map(([name, map]) => [name, corridorMapFunc(map)])
+) as CorridorMapFuncCollection;
 
 // TODO: remove duplicates
 
@@ -53,12 +55,12 @@ function getValidCorridors(corridorsSeed: Corridor[]) {
 	allCorridors.splice(
 		allCorridors.length,
 		0,
-		...corridorsSeed.map(mappers.mirror)
+		...corridorsSeed.map(mapFuncs.mirror)
 	);
 
 	let lastSpin = allCorridors.slice();
 	for (const _ in Array.from({ length: 5 })) {
-		lastSpin = lastSpin.map(mappers.spin);
+		lastSpin = lastSpin.map(mapFuncs.spin);
 		allCorridors.splice(allCorridors.length, 0, ...lastSpin);
 	}
 
