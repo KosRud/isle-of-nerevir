@@ -1,4 +1,5 @@
 import type { Enum, EnumValue } from '../../submodules/MadCakeUtil-ts/mod';
+import '../../submodules/MadCakeUtil-ts/augmentations.ts';
 
 const Move: Enum = {
 	DOWN: 0,
@@ -47,22 +48,30 @@ const mapFuncs: CorridorMapFuncCollection = Object.fromEntries(
 	Object.entries(moveMaps).map(([name, map]) => [name, corridorMapFunc(map)])
 ) as CorridorMapFuncCollection;
 
+function uniqueCorridors(corridors: Corridor[]) {
+	return corridors.uniqueByHash((corridor) =>
+		corridor.map((move) => String(move)).join('')
+	);
+}
+
 // TODO: remove duplicates
 
 function getValidCorridors(corridorsSeed: Corridor[]) {
-	const allCorridors = corridorsSeed.slice();
+	let allCorridors = corridorsSeed.slice();
 
 	allCorridors.splice(
 		allCorridors.length,
 		0,
 		...corridorsSeed.map(mapFuncs.mirror)
 	);
+	allCorridors = uniqueCorridors(allCorridors);
 
 	let lastSpin = allCorridors.slice();
 	for (const _ in Array.from({ length: 5 })) {
 		lastSpin = lastSpin.map(mapFuncs.spin);
 		allCorridors.splice(allCorridors.length, 0, ...lastSpin);
 	}
+	allCorridors = uniqueCorridors(allCorridors);
 
 	return allCorridors;
 }
